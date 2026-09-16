@@ -13,7 +13,7 @@ export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://soroban-testn
 function resolveDeployment(): { contractId: string; networkPassphrase: string } {
   // A contract developer can point the app at a local deployment through this
   // environment variable, per docs/multi-repo.md.
-  const path = process.env.CONSTELLATION_DEPLOYMENTS;
+  const path = process.env.CYGNUS_DEPLOYMENTS;
   if (path) {
     const parsed = JSON.parse(readFileSync(path, "utf8"));
     return { contractId: parsed.contracts.programme, networkPassphrase: parsed.networkPassphrase };
