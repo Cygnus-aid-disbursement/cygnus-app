@@ -2,7 +2,7 @@
 
 import { Cygnus, deployments } from "@cygnus-aid-disbursement/sdk";
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://soroban-testnet.stellar.org";
+export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://soroban-testnet.stellar.org";
 // A funded Testnet account, used only to simulate read-only calls from the
 // browser. No signing happens with it.
 const READER =
