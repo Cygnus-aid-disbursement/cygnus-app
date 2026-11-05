@@ -24,7 +24,7 @@ function resolveDeployment(): { contractId: string; networkPassphrase: string } 
   };
 }
 
-export function serverCygnus(): Cygnus {
+function serverCygnus(): Cygnus {
   const deployment = resolveDeployment();
   return new Cygnus({
     contractId: deployment.contractId,
