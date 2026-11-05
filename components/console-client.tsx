@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CONTRACT_ID, NETWORK_PASSPHRASE, RPC_URL } from "@/lib/client-cygnus";
+import { formatErrorMessage } from "@/lib/errors";
 import { shortAddress } from "@/lib/format";
 
 // Native XLM Stellar Asset Contract on Testnet. Editable per programme.
@@ -76,7 +77,7 @@ export function ConsoleClient() {
       const result = await action(client());
       setStatus(`${label} succeeded${result === undefined ? "" : `: ${String(result)}`}`);
     } catch (e) {
-      setStatus(`${label} failed: ${e instanceof Error ? e.message : String(e)}`);
+      setStatus(`${label} failed: ${formatErrorMessage(e)}`);
     } finally {
       setBusy(false);
     }

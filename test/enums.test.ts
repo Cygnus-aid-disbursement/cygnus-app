@@ -51,11 +51,28 @@ describe("approverLabel", () => {
 });
 
 describe("progress", () => {
-  it("clamps to a percentage", () => {
+  it("calculates exact percentage for normal ranges", () => {
     expect(progress(0n, 100n)).toBe(0);
     expect(progress(50n, 100n)).toBe(50);
+    expect(progress(100n, 100n)).toBe(100);
+  });
+
+  it("handles integer truncation correctly", () => {
+    expect(progress(1n, 3n)).toBe(33);
+    expect(progress(2n, 3n)).toBe(66);
+  });
+
+  it("clamps to 0 and 100", () => {
     expect(progress(200n, 100n)).toBe(100);
     expect(progress(1n, 0n)).toBe(0);
+    expect(progress(0n, 0n)).toBe(0);
     expect(progress(-10n, 100n)).toBe(0);
+    expect(progress(50n, -100n)).toBe(0);
+  });
+
+  it("handles very large 128-bit numbers without precision loss", () => {
+    const huge = 100_000_000_000_000_000_000n;
+    expect(progress(huge / 2n, huge)).toBe(50);
+    expect(progress(huge / 4n, huge)).toBe(25);
   });
 });
