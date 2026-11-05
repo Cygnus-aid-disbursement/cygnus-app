@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Buffer } from "buffer";
 import {
   StellarWalletsKit,
   WalletNetwork,
