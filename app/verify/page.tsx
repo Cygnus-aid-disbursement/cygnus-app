@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Buffer } from "buffer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { readerCygnus } from "@/lib/client-cygnus";
+import { verifyReceipt, type ReceiptVerificationResult } from "@/lib/receipt";
 
 const SAMPLE = `{
   "programmeId": "1",
@@ -13,30 +13,17 @@ const SAMPLE = `{
   "proof": ["<64 hex chars>", "..."]
 }`;
 
-type Result = { kind: "included" } | { kind: "excluded" } | { kind: "error"; message: string };
-
 export default function VerifyPage() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<Result | null>(null);
+  const [result, setResult] = useState<ReceiptVerificationResult | null>(null);
 
   async function verify() {
     setBusy(true);
     setResult(null);
     try {
-      const receipt = JSON.parse(text);
-      const leaf = Buffer.from(receipt.leaf, "hex");
-      const proof = (receipt.proof as string[]).map((p) => Buffer.from(p, "hex"));
-      if (leaf.length !== 32) throw new Error("leaf must be 32 bytes of hex");
-      const ok = await readerCygnus().verifyInclusion(
-        BigInt(receipt.programmeId),
-        Number(receipt.batchIndex),
-        leaf,
-        proof,
-      );
-      setResult({ kind: ok ? "included" : "excluded" });
-    } catch (e) {
-      setResult({ kind: "error", message: e instanceof Error ? e.message : String(e) });
+      const res = await verifyReceipt(text, readerCygnus());
+      setResult(res);
     } finally {
       setBusy(false);
     }
