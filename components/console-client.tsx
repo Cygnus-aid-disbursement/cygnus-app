@@ -162,7 +162,9 @@ function ClaimForm({ busy, run }: { busy: boolean; run: Runner }) {
       {labelledInput("Programme id", programmeId, setProgrammeId, { inputMode: "numeric" })}
       {labelledInput("Milestone index", index, setIndex, { inputMode: "numeric" })}
       <label className="block text-sm">
-        <span className="text-muted-foreground">Evidence (text or JSON; only its hash is stored)</span>
+        <span className="text-muted-foreground">
+          Evidence (text or JSON; only its hash is stored)
+        </span>
         <textarea
           className="mt-1 h-24 w-full rounded-md border border-border bg-background p-2 text-sm"
           value={evidence}
