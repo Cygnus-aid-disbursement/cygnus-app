@@ -9,8 +9,8 @@ export default function ConsolePage() {
         <h1 className="text-2xl font-semibold">Implementer console</h1>
         <p className="max-w-3xl text-muted-foreground">
           Authenticated by your wallet. Create and fund programmes, claim milestones with evidence,
-          and approve or reject as an approver. Documents never leave your browser; only their hashes
-          are written on chain.
+          and approve or reject as an approver. Documents never leave your browser; only their
+          hashes are written on chain.
         </p>
       </div>
       <ConsoleClient />

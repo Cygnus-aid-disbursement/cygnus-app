@@ -23,9 +23,9 @@ export default async function Home() {
         <h1 className="text-2xl font-semibold">Aid disbursement programmes</h1>
         <p className="max-w-3xl text-muted-foreground">
           Every programme, milestone, approval, and disbursement here is read live from the Stellar
-          Testnet. The record shows that funds moved under a stated rule. It does not show that goods
-          were delivered or that the right people received aid, and beneficiaries are never named:
-          each disbursement publishes only a Merkle root, a total, and a count.
+          Testnet. The record shows that funds moved under a stated rule. It does not show that
+          goods were delivered or that the right people received aid, and beneficiaries are never
+          named: each disbursement publishes only a Merkle root, a total, and a count.
         </p>
       </section>
 

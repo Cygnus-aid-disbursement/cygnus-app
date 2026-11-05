@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Buffer } from "buffer";
 import {
   StellarWalletsKit,
   WalletNetwork,
@@ -17,10 +16,9 @@ import {
 } from "@cygnus-aid-disbursement/sdk";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CONTRACT_ID, NETWORK_PASSPHRASE } from "@/lib/client-cygnus";
+import { CONTRACT_ID, NETWORK_PASSPHRASE, RPC_URL } from "@/lib/client-cygnus";
 import { shortAddress } from "@/lib/format";
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://soroban-testnet.stellar.org";
 // Native XLM Stellar Asset Contract on Testnet. Editable per programme.
 const NATIVE_SAC = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
 
@@ -163,7 +161,9 @@ function ClaimForm({ busy, run }: { busy: boolean; run: Runner }) {
       {labelledInput("Programme id", programmeId, setProgrammeId, { inputMode: "numeric" })}
       {labelledInput("Milestone index", index, setIndex, { inputMode: "numeric" })}
       <label className="block text-sm">
-        <span className="text-muted-foreground">Evidence (text or JSON; only its hash is stored)</span>
+        <span className="text-muted-foreground">
+          Evidence (text or JSON; only its hash is stored)
+        </span>
         <textarea
           className="mt-1 h-24 w-full rounded-md border border-border bg-background p-2 text-sm"
           value={evidence}

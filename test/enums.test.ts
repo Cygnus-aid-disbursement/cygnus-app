@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { approverLabel, milestoneStatusLabel, programmeStatusLabel, progress } from "../lib/enums";
-import type { ApproverConfig, MilestoneStatus, ProgrammeStatus } from "@cygnus-aid-disbursement/sdk";
+import type {
+  ApproverConfig,
+  MilestoneStatus,
+  ProgrammeStatus,
+} from "@cygnus-aid-disbursement/sdk";
 
 describe("milestoneStatusLabel", () => {
   it("returns status tag name", () => {

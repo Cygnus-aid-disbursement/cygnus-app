@@ -1,5 +1,10 @@
 import { readFileSync } from "node:fs";
-import { Cygnus, deployments, type Programme, type DisbursementBatch } from "@cygnus-aid-disbursement/sdk";
+import {
+  Cygnus,
+  deployments,
+  type Programme,
+  type DisbursementBatch,
+} from "@cygnus-aid-disbursement/sdk";
 
 // Server-side reads only. This module must not be imported from a client
 // component; the console builds its own client with a wallet signer.
@@ -24,7 +29,7 @@ function resolveDeployment(): { contractId: string; networkPassphrase: string } 
   };
 }
 
-export function serverCygnus(): Cygnus {
+function serverCygnus(): Cygnus {
   const deployment = resolveDeployment();
   return new Cygnus({
     contractId: deployment.contractId,
