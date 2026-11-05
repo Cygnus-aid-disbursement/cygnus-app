@@ -16,10 +16,9 @@ import {
 } from "@cygnus-aid-disbursement/sdk";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CONTRACT_ID, NETWORK_PASSPHRASE } from "@/lib/client-cygnus";
+import { CONTRACT_ID, NETWORK_PASSPHRASE, RPC_URL } from "@/lib/client-cygnus";
 import { shortAddress } from "@/lib/format";
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://soroban-testnet.stellar.org";
 // Native XLM Stellar Asset Contract on Testnet. Editable per programme.
 const NATIVE_SAC = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
 
