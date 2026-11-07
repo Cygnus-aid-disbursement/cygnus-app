@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { buildDisbursementPackage, parsePaymentEntriesJson } from "../lib/batch-builder";
+import {
+  buildDisbursementPackage,
+  parsePaymentEntriesJson,
+  parsePaymentEntriesCsv,
+} from "../lib/batch-builder";
 import { verifyReceipt } from "../lib/receipt";
 import { verifyProof } from "@cygnus-aid-disbursement/sdk";
 import { Buffer } from "buffer";
@@ -39,6 +43,53 @@ describe("batch-builder module", () => {
       expect(() =>
         parsePaymentEntriesJson(JSON.stringify([{ reference: "B1", amount: -50 }])),
       ).toThrow("invalid amount");
+    });
+  });
+
+  describe("parsePaymentEntriesCsv", () => {
+    it("parses valid CSV with headers", () => {
+      const csv = `reference,amount
+BEN-101,50000000
+BEN-102,75000000`;
+      const entries = parsePaymentEntriesCsv(csv);
+      expect(entries).toHaveLength(2);
+      expect(entries[0].reference).toBe("BEN-101");
+      expect(entries[0].amount).toBe(50000000n);
+      expect(entries[1].reference).toBe("BEN-102");
+      expect(entries[1].amount).toBe(75000000n);
+    });
+
+    it("parses CSV without headers and handles quotes and whitespace", () => {
+      const csv = ` "BEN-201" , 1000
+"BEN-202",  2000 `;
+      const entries = parsePaymentEntriesCsv(csv);
+      expect(entries).toHaveLength(2);
+      expect(entries[0].reference).toBe("BEN-201");
+      expect(entries[0].amount).toBe(1000n);
+      expect(entries[1].reference).toBe("BEN-202");
+      expect(entries[1].amount).toBe(2000n);
+    });
+
+    it("throws on empty CSV or CSV with only headers", () => {
+      expect(() => parsePaymentEntriesCsv("")).toThrow("empty");
+      expect(() => parsePaymentEntriesCsv("reference,amount\n")).toThrow("only headers");
+    });
+
+    it("reports specific line number on malformed row or invalid amount", () => {
+      const badFormat = `reference,amount
+BEN-1,100
+INVALID_LINE_WITHOUT_COMMA
+BEN-2,200`;
+      expect(() => parsePaymentEntriesCsv(badFormat)).toThrow('Line 3: expected format "reference,amount"');
+
+      const badAmount = `reference,amount
+BEN-1,100
+BEN-2,not-a-number`;
+      expect(() => parsePaymentEntriesCsv(badAmount)).toThrow('Line 3: invalid amount "not-a-number"');
+
+      const negativeAmount = `reference,amount
+BEN-1,-50`;
+      expect(() => parsePaymentEntriesCsv(negativeAmount)).toThrow('Line 2: invalid amount "-50"');
     });
   });
 

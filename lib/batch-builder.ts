@@ -121,3 +121,62 @@ export function parsePaymentEntriesJson(jsonText: string): BatchEntry[] {
     };
   });
 }
+
+/**
+ * Parses CSV text formatted as "reference,amount" (with optional header row).
+ * Handles quoted fields, empty line stripping, and reports line numbers on errors.
+ */
+export function parsePaymentEntriesCsv(csvText: string): BatchEntry[] {
+  const lines = csvText.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
+  if (lines.length === 0) {
+    throw new Error("Disbursement entries CSV is empty");
+  }
+
+  const entries: BatchEntry[] = [];
+  let startIndex = 0;
+
+  // Check if first row is a header
+  const firstLine = lines[0].toLowerCase();
+  if (
+    firstLine.includes("reference") ||
+    firstLine.includes("recipient") ||
+    firstLine.includes("beneficiary") ||
+    firstLine.includes("amount")
+  ) {
+    startIndex = 1;
+  }
+
+  if (startIndex >= lines.length) {
+    throw new Error("Disbursement entries CSV contains only headers and no payment records");
+  }
+
+  for (let i = startIndex; i < lines.length; i++) {
+    const lineNum = i + 1;
+    const line = lines[i];
+
+    // Simple robust comma split respecting basic quotes
+    const parts = line.split(",").map((s) => s.trim().replace(/^["']|["']$/g, ""));
+    if (parts.length < 2) {
+      throw new Error(`Line ${lineNum}: expected format "reference,amount"`);
+    }
+
+    const reference = parts[0];
+    const amountStr = parts[1];
+
+    if (!reference || reference.length === 0) {
+      throw new Error(`Line ${lineNum}: reference cannot be empty`);
+    }
+
+    let amount: bigint;
+    try {
+      amount = BigInt(amountStr);
+      if (amount <= 0n) throw new Error();
+    } catch {
+      throw new Error(`Line ${lineNum}: invalid amount "${amountStr}" (must be positive integer stroops)`);
+    }
+
+    entries.push({ reference, amount });
+  }
+
+  return entries;
+}
