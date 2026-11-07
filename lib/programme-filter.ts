@@ -1,6 +1,7 @@
 import type { Programme } from "@cygnus-aid-disbursement/sdk";
 import { formatStroops, shortAddress } from "./format";
 import { programmeStatusLabel, progress } from "./enums";
+import { isImplementerVerified } from "./astrolabe";
 
 export interface ClientProgrammeSummary {
   id: string;
@@ -13,6 +14,7 @@ export interface ClientProgrammeSummary {
   sponsorShort: string;
   implementerShort: string;
   progressPct: number;
+  isImplementerVerified: boolean;
 }
 
 export function toClientProgrammeSummary(p: Programme): ClientProgrammeSummary {
@@ -27,6 +29,7 @@ export function toClientProgrammeSummary(p: Programme): ClientProgrammeSummary {
     sponsorShort: shortAddress(p.sponsor),
     implementerShort: shortAddress(p.implementer),
     progressPct: progress(p.disbursed, p.total),
+    isImplementerVerified: isImplementerVerified(p.implementer),
   };
 }
 

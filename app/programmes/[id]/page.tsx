@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/progress-bar";
 import { CopyButton } from "@/components/copy-button";
 import { EventTimeline } from "@/components/event-timeline";
+import { AstrolabeBadge } from "@/components/astrolabe-badge";
 import { getBatches, getProgramme, getProgrammeEvents } from "@/lib/cygnus";
+import { isImplementerVerified } from "@/lib/astrolabe";
 import { formatCygnusEvent } from "@/lib/events";
 import { approverLabel, milestoneStatusLabel, programmeStatusLabel, progress } from "@/lib/enums";
 import { formatStroops, formatTimestamp, hex, shortAddress, shortHex } from "@/lib/format";
@@ -57,6 +59,7 @@ export default async function ProgrammeDetail({ params }: { params: Promise<{ id
               label="Implementer"
               value={shortAddress(programme.implementer)}
               copyValue={programme.implementer}
+              extra={isImplementerVerified(programme.implementer) ? <AstrolabeBadge /> : undefined}
             />
             <Field label="Approver" value={approverLabel(programme.approver)} />
             <Field
@@ -190,17 +193,20 @@ function Field({
   value,
   mono,
   copyValue,
+  extra,
 }: {
   label: string;
   value: string;
   mono?: boolean;
   copyValue?: string;
+  extra?: React.ReactNode;
 }) {
   return (
     <div>
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className={`flex items-center gap-1 ${mono ? "font-mono text-xs" : ""}`}>
+      <dd className={`flex flex-wrap items-center gap-1 ${mono ? "font-mono text-xs" : ""}`}>
         <span>{value}</span>
+        {extra}
         {copyValue && <CopyButton value={copyValue} label={`Copy ${label.toLowerCase()}`} />}
       </dd>
     </div>

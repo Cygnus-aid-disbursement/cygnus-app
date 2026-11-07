@@ -17,6 +17,7 @@ describe("ProgrammeSearch component", () => {
       sponsorShort: "GASPO...1111",
       implementerShort: "GAIMP...1111",
       progressPct: 25,
+      isImplementerVerified: true,
     },
     {
       id: "2",
@@ -29,6 +30,7 @@ describe("ProgrammeSearch component", () => {
       sponsorShort: "GASPO...2222",
       implementerShort: "GAIMP...2222",
       progressPct: 100,
+      isImplementerVerified: false,
     },
   ];
 
