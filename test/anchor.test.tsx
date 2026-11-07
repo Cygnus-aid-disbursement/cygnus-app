@@ -6,6 +6,7 @@ import {
   requestQuote,
   initiatePayout,
   pollPayoutStatus,
+  isQuoteExpired,
   type Anchor,
   type Quote,
   type PayoutStatus,
@@ -82,6 +83,31 @@ describe("anchor module", () => {
       const res = await pollPayoutStatus("payout-xyz-789", mockAnchor);
       expect(res.payoutId).toBe("payout-xyz-789");
       expect(res.state).toBe("completed");
+    });
+  });
+
+  describe("Validation guards & quote expiration", () => {
+    it("validates positive amounts in requestQuote", async () => {
+      await expect(requestQuote(0n)).rejects.toThrow("greater than zero");
+      await expect(requestQuote(-500n)).rejects.toThrow("greater than zero");
+    });
+
+    it("validates arguments in initiatePayout", async () => {
+      const validRef = Buffer.alloc(32);
+      await expect(initiatePayout("", validRef, 100n)).rejects.toThrow("Quote ID cannot be empty");
+      await expect(
+        initiatePayout("quote-1", Buffer.alloc(16), 100n),
+      ).rejects.toThrow("32-byte Buffer");
+      await expect(initiatePayout("quote-1", validRef, 0n)).rejects.toThrow("greater than zero");
+    });
+
+    it("evaluates quote expiration correctly", () => {
+      const pastTime = new Date(Date.now() - 10000).toISOString();
+      const futureTime = new Date(Date.now() + 60000).toISOString();
+
+      expect(isQuoteExpired(pastTime)).toBe(true);
+      expect(isQuoteExpired(futureTime)).toBe(false);
+      expect(isQuoteExpired("invalid-date-string")).toBe(false);
     });
   });
 

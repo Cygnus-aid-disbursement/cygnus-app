@@ -38,6 +38,17 @@ export interface FormattedPayoutStatus {
 }
 
 /**
+ * Checks whether an ISO expiration timestamp has elapsed.
+ */
+export function isQuoteExpired(expiresAt: string, nowMs = Date.now()): boolean {
+  const expiryTime = Date.parse(expiresAt);
+  if (isNaN(expiryTime)) {
+    return false;
+  }
+  return expiryTime <= nowMs;
+}
+
+/**
  * Requests an exchange quote from the anchor for converting stroops to local fiat / mobile asset.
  */
 export async function requestQuote(
@@ -45,6 +56,10 @@ export async function requestQuote(
   destinationAsset = "NGN",
   anchor: Anchor = getAnchorClient(),
 ): Promise<FormattedQuote> {
+  if (sourceAmountStroops <= 0n) {
+    throw new Error("Source amount must be greater than zero stroops");
+  }
+
   try {
     const quote = await anchor.quote(sourceAmountStroops, destinationAsset);
     return {
@@ -74,9 +89,19 @@ export async function initiatePayout(
   sourceAmount: bigint,
   anchor: Anchor = getAnchorClient(),
 ): Promise<FormattedPayoutStatus> {
+  if (!quoteId || quoteId.trim().length === 0) {
+    throw new Error("Quote ID cannot be empty");
+  }
+  if (!Buffer.isBuffer(recipientRef) || recipientRef.length !== 32) {
+    throw new Error("Recipient reference must be a 32-byte Buffer");
+  }
+  if (sourceAmount <= 0n) {
+    throw new Error("Payout amount must be greater than zero stroops");
+  }
+
   try {
     const status = await anchor.initiatePayout({
-      quoteId,
+      quoteId: quoteId.trim(),
       recipientRef,
       sourceAmount,
     });

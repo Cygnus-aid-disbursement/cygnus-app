@@ -10,6 +10,7 @@ import {
   requestQuote,
   initiatePayout,
   pollPayoutStatus,
+  isQuoteExpired,
   type FormattedQuote,
   type FormattedPayoutStatus,
 } from "@/lib/anchor";
@@ -177,12 +178,17 @@ export function AnchorPayout() {
 
             {quoteResult && (
               <div className="rounded-md border border-border bg-muted/40 p-3 text-xs space-y-1">
-                <div className="font-medium text-foreground">Quote: {quoteResult.id}</div>
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-foreground">Quote: {quoteResult.id}</span>
+                  {isQuoteExpired(quoteResult.expiresAt) && (
+                    <Badge tone="warn">Expired</Badge>
+                  )}
+                </div>
                 <div>Source: {formatStroops(BigInt(quoteResult.sourceAmountFormatted))} XLM</div>
                 <div>
                   Destination: {quoteResult.destinationAmount} {quoteResult.destinationAsset}
                 </div>
-                <div>Expires at: {quoteResult.expiresAt}</div>
+                <div className="text-muted-foreground">Expires at: {quoteResult.expiresAt}</div>
               </div>
             )}
           </div>
