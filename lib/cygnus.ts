@@ -4,6 +4,7 @@ import {
   deployments,
   type Programme,
   type DisbursementBatch,
+  type CygnusEvent,
 } from "@cygnus-aid-disbursement/sdk";
 import { parseContractErrorCode } from "./errors";
 
@@ -108,4 +109,18 @@ export async function getBatches(
     }
   }
   return batches;
+}
+
+export async function getProgrammeEvents(
+  programmeId: bigint,
+  startLedger = 0,
+  client?: Pick<Cygnus, "events">,
+): Promise<CygnusEvent[]> {
+  const cygnus = client ?? serverCygnus();
+  try {
+    const events = await cygnus.events(startLedger);
+    return events.filter((e) => e.programmeId === programmeId);
+  } catch {
+    return [];
+  }
 }
