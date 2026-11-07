@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/progress-bar";
 import { CopyButton } from "@/components/copy-button";
-import { getBatches, getProgramme } from "@/lib/cygnus";
+import { EventTimeline } from "@/components/event-timeline";
+import { getBatches, getProgramme, getProgrammeEvents } from "@/lib/cygnus";
+import { formatCygnusEvent } from "@/lib/events";
 import { approverLabel, milestoneStatusLabel, programmeStatusLabel, progress } from "@/lib/enums";
 import { formatStroops, formatTimestamp, hex, shortAddress, shortHex } from "@/lib/format";
 
@@ -20,7 +22,11 @@ export default async function ProgrammeDetail({ params }: { params: Promise<{ id
   }
   if (!programme) notFound();
 
-  const batches = await getBatches(programme.id, programme.batch_count).catch(() => []);
+  const [batches, rawEvents] = await Promise.all([
+    getBatches(programme.id, programme.batch_count).catch(() => []),
+    getProgrammeEvents(programme.id).catch(() => []),
+  ]);
+  const events = rawEvents.map(formatCygnusEvent);
 
   return (
     <div className="space-y-8">
@@ -159,6 +165,20 @@ export default async function ProgrammeDetail({ params }: { params: Promise<{ id
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Event feed</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Chronological contract events emitted by the programme contract on the Stellar ledger.
+            The record confirms transactions executed under protocol rules; it does not represent
+            proof of physical delivery of goods or aid receipt.
+          </p>
+          <EventTimeline events={events} />
         </CardContent>
       </Card>
     </div>

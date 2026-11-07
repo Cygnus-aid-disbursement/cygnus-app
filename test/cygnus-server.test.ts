@@ -1,7 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
-import { listProgrammes, getProgramme, getBatches, resolveDeployment } from "../lib/cygnus";
+import {
+  listProgrammes,
+  getProgramme,
+  getBatches,
+  getProgrammeEvents,
+  resolveDeployment,
+} from "../lib/cygnus";
 import { createMockProgramme, createMockBatch } from "./mocks/fixtures";
-import type { Programme, DisbursementBatch } from "@cygnus-aid-disbursement/sdk";
+import type { Programme, DisbursementBatch, CygnusEvent } from "@cygnus-aid-disbursement/sdk";
 
 describe("cygnus server queries", () => {
   describe("listProgrammes", () => {
@@ -131,6 +137,40 @@ describe("cygnus server queries", () => {
       const deployment = resolveDeployment();
       expect(deployment.contractId).toMatch(/^C[A-Z0-9]{55}$/);
       expect(deployment.networkPassphrase).toContain("Test SDF Network");
+    });
+  });
+
+  describe("getProgrammeEvents", () => {
+    it("filters contract events strictly for the requested programme ID", async () => {
+      const evProg1: CygnusEvent = {
+        type: "ProgrammeFunded",
+        programmeId: 1n,
+        amount: 100n,
+      };
+      const evProg2: CygnusEvent = {
+        type: "ProgrammeFunded",
+        programmeId: 2n,
+        amount: 200n,
+      };
+
+      const mockClient = {
+        events: vi.fn(async () => [evProg1, evProg2]),
+      };
+
+      const events = await getProgrammeEvents(1n, 0, mockClient);
+      expect(events).toHaveLength(1);
+      expect(events[0].programmeId).toBe(1n);
+    });
+
+    it("returns empty array gracefully on network/RPC error", async () => {
+      const mockClient = {
+        events: vi.fn(async () => {
+          throw new Error("RPC events rate limited");
+        }),
+      };
+
+      const events = await getProgrammeEvents(1n, 0, mockClient);
+      expect(events).toEqual([]);
     });
   });
 });
