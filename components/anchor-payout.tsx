@@ -180,9 +180,7 @@ export function AnchorPayout() {
               <div className="rounded-md border border-border bg-muted/40 p-3 text-xs space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-foreground">Quote: {quoteResult.id}</span>
-                  {isQuoteExpired(quoteResult.expiresAt) && (
-                    <Badge tone="warn">Expired</Badge>
-                  )}
+                  {isQuoteExpired(quoteResult.expiresAt) && <Badge tone="warn">Expired</Badge>}
                 </div>
                 <div>Source: {formatStroops(BigInt(quoteResult.sourceAmountFormatted))} XLM</div>
                 <div>

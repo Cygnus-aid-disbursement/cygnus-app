@@ -127,7 +127,10 @@ export function parsePaymentEntriesJson(jsonText: string): BatchEntry[] {
  * Handles quoted fields, empty line stripping, and reports line numbers on errors.
  */
 export function parsePaymentEntriesCsv(csvText: string): BatchEntry[] {
-  const lines = csvText.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
+  const lines = csvText
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
   if (lines.length === 0) {
     throw new Error("Disbursement entries CSV is empty");
   }
@@ -172,7 +175,9 @@ export function parsePaymentEntriesCsv(csvText: string): BatchEntry[] {
       amount = BigInt(amountStr);
       if (amount <= 0n) throw new Error();
     } catch {
-      throw new Error(`Line ${lineNum}: invalid amount "${amountStr}" (must be positive integer stroops)`);
+      throw new Error(
+        `Line ${lineNum}: invalid amount "${amountStr}" (must be positive integer stroops)`,
+      );
     }
 
     entries.push({ reference, amount });

@@ -95,9 +95,9 @@ describe("anchor module", () => {
     it("validates arguments in initiatePayout", async () => {
       const validRef = Buffer.alloc(32);
       await expect(initiatePayout("", validRef, 100n)).rejects.toThrow("Quote ID cannot be empty");
-      await expect(
-        initiatePayout("quote-1", Buffer.alloc(16), 100n),
-      ).rejects.toThrow("32-byte Buffer");
+      await expect(initiatePayout("quote-1", Buffer.alloc(16), 100n)).rejects.toThrow(
+        "32-byte Buffer",
+      );
       await expect(initiatePayout("quote-1", validRef, 0n)).rejects.toThrow("greater than zero");
     });
 

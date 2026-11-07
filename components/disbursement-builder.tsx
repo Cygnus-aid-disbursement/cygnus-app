@@ -151,7 +151,8 @@ export function DisbursementBuilder({ busy, run }: DisbursementBuilderProps) {
         <div>
           <div className="flex items-center justify-between">
             <label htmlFor="batch-entries-input" className="text-xs text-muted-foreground">
-              Payment Entries {inputFormat === "json" ? "(JSON array)" : "(CSV format: reference,amount)"}
+              Payment Entries{" "}
+              {inputFormat === "json" ? "(JSON array)" : "(CSV format: reference,amount)"}
             </label>
             <div className="flex items-center gap-1">
               <button

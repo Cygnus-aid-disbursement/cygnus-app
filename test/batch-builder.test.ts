@@ -80,12 +80,16 @@ BEN-102,75000000`;
 BEN-1,100
 INVALID_LINE_WITHOUT_COMMA
 BEN-2,200`;
-      expect(() => parsePaymentEntriesCsv(badFormat)).toThrow('Line 3: expected format "reference,amount"');
+      expect(() => parsePaymentEntriesCsv(badFormat)).toThrow(
+        'Line 3: expected format "reference,amount"',
+      );
 
       const badAmount = `reference,amount
 BEN-1,100
 BEN-2,not-a-number`;
-      expect(() => parsePaymentEntriesCsv(badAmount)).toThrow('Line 3: invalid amount "not-a-number"');
+      expect(() => parsePaymentEntriesCsv(badAmount)).toThrow(
+        'Line 3: invalid amount "not-a-number"',
+      );
 
       const negativeAmount = `reference,amount
 BEN-1,-50`;
