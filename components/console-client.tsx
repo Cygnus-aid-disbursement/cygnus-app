@@ -16,6 +16,7 @@ import {
 } from "@cygnus-aid-disbursement/sdk";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/copy-button";
 import { CONTRACT_ID, NETWORK_PASSPHRASE, RPC_URL } from "@/lib/client-cygnus";
 import { formatErrorMessage } from "@/lib/errors";
 import { shortAddress } from "@/lib/format";
@@ -100,9 +101,12 @@ export function ConsoleClient() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between rounded-md border border-border p-3 text-sm">
-        <span>
-          Connected as <span className="font-mono">{shortAddress(address)}</span>
-        </span>
+        <div className="flex items-center gap-2">
+          <span>
+            Connected as <span className="font-mono">{shortAddress(address)}</span>
+          </span>
+          <CopyButton value={address} label="Copy connected wallet address" />
+        </div>
         <Button variant="outline" size="sm" onClick={() => setAddress(null)}>
           Disconnect
         </Button>

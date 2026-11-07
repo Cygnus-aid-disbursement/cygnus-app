@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/progress-bar";
+import { CopyButton } from "@/components/copy-button";
 import { getBatches, getProgramme } from "@/lib/cygnus";
 import { approverLabel, milestoneStatusLabel, programmeStatusLabel, progress } from "@/lib/enums";
 import { formatStroops, formatTimestamp, hex, shortAddress, shortHex } from "@/lib/format";
@@ -41,15 +42,32 @@ export default async function ProgrammeDetail({ params }: { params: Promise<{ id
         </CardHeader>
         <CardContent className="space-y-4">
           <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
-            <Field label="Sponsor" value={shortAddress(programme.sponsor)} />
-            <Field label="Implementer" value={shortAddress(programme.implementer)} />
+            <Field
+              label="Sponsor"
+              value={shortAddress(programme.sponsor)}
+              copyValue={programme.sponsor}
+            />
+            <Field
+              label="Implementer"
+              value={shortAddress(programme.implementer)}
+              copyValue={programme.implementer}
+            />
             <Field label="Approver" value={approverLabel(programme.approver)} />
-            <Field label="Asset" value={shortAddress(programme.asset)} />
+            <Field
+              label="Asset"
+              value={shortAddress(programme.asset)}
+              copyValue={programme.asset}
+            />
             <Field label="Budget" value={formatStroops(programme.total)} />
             <Field label="Funded" value={formatStroops(programme.funded)} />
             <Field label="Released" value={formatStroops(programme.released)} />
             <Field label="Disbursed" value={formatStroops(programme.disbursed)} />
-            <Field label="Metadata hash" value={shortHex(programme.metadata_hash)} mono />
+            <Field
+              label="Metadata hash"
+              value={shortHex(programme.metadata_hash)}
+              copyValue={hex(programme.metadata_hash)}
+              mono
+            />
           </dl>
           <ProgressBar value={progress(programme.disbursed, programme.total)} />
         </CardContent>
@@ -73,12 +91,27 @@ export default async function ProgrammeDetail({ params }: { params: Promise<{ id
                   </span>
                 </div>
                 <dl className="mt-1 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-                  <Field label="Description hash" value={shortHex(m.description_hash)} mono />
+                  <Field
+                    label="Description hash"
+                    value={shortHex(m.description_hash)}
+                    copyValue={hex(m.description_hash)}
+                    mono
+                  />
                   {state.evidence_hash && (
-                    <Field label="Evidence hash" value={shortHex(state.evidence_hash)} mono />
+                    <Field
+                      label="Evidence hash"
+                      value={shortHex(state.evidence_hash)}
+                      copyValue={hex(state.evidence_hash)}
+                      mono
+                    />
                   )}
                   {state.reason_hash && (
-                    <Field label="Rejection reason hash" value={shortHex(state.reason_hash)} mono />
+                    <Field
+                      label="Rejection reason hash"
+                      value={shortHex(state.reason_hash)}
+                      copyValue={hex(state.reason_hash)}
+                      mono
+                    />
                   )}
                   {state.claimed_at > 0n && (
                     <Field label="Claimed at" value={formatTimestamp(state.claimed_at)} />
@@ -116,11 +149,12 @@ export default async function ProgrammeDetail({ params }: { params: Promise<{ id
                   <div className="mt-1 grid gap-x-6 gap-y-1 sm:grid-cols-3">
                     <Field label="Total" value={formatStroops(b.total)} />
                     <Field label="Count" value={b.count.toString()} />
-                    <Field label="Root" value={shortHex(b.root)} mono />
+                    <Field label="Root" value={shortHex(b.root)} copyValue={hex(b.root)} mono />
                   </div>
-                  <p className="mt-1 break-all font-mono text-xs text-muted-foreground">
-                    {hex(b.root)}
-                  </p>
+                  <div className="mt-1.5 flex items-center justify-between gap-2 rounded bg-muted/40 px-2 py-1 font-mono text-xs text-muted-foreground">
+                    <span className="break-all">{hex(b.root)}</span>
+                    <CopyButton value={hex(b.root)} label={`Copy batch ${b.index} Merkle root`} />
+                  </div>
                 </div>
               ))}
             </div>
@@ -131,11 +165,24 @@ export default async function ProgrammeDetail({ params }: { params: Promise<{ id
   );
 }
 
-function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function Field({
+  label,
+  value,
+  mono,
+  copyValue,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  copyValue?: string;
+}) {
   return (
     <div>
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className={mono ? "font-mono text-xs" : ""}>{value}</dd>
+      <dd className={`flex items-center gap-1 ${mono ? "font-mono text-xs" : ""}`}>
+        <span>{value}</span>
+        {copyValue && <CopyButton value={copyValue} label={`Copy ${label.toLowerCase()}`} />}
+      </dd>
     </div>
   );
 }
