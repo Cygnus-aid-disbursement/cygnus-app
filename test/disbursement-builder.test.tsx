@@ -13,7 +13,9 @@ describe("DisbursementBuilder component", () => {
     );
     expect(html).toContain("batch-programme-id");
     expect(html).toContain("batch-index-input");
-    expect(html).toContain("batch-json-input");
+    expect(html).toContain("batch-entries-input");
+    expect(html).toContain("JSON");
+    expect(html).toContain("CSV");
     expect(html).toContain("Compute Merkle tree");
   });
 

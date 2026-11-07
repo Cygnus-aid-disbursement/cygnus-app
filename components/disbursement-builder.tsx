@@ -10,6 +10,7 @@ import { CopyButton } from "@/components/copy-button";
 import {
   buildDisbursementPackage,
   parsePaymentEntriesJson,
+  parsePaymentEntriesCsv,
   type BuiltDisbursement,
 } from "@/lib/batch-builder";
 import { formatStroops } from "@/lib/format";
@@ -25,10 +26,17 @@ const DEFAULT_SAMPLE_JSON = `[
   { "reference": "BENEFICIARY_ID_003", "amount": 30000000 }
 ]`;
 
+const DEFAULT_SAMPLE_CSV = `reference,amount
+BENEFICIARY_ID_001,10000000
+BENEFICIARY_ID_002,20000000
+BENEFICIARY_ID_003,30000000`;
+
 export function DisbursementBuilder({ busy, run }: DisbursementBuilderProps) {
   const [programmeId, setProgrammeId] = useState("0");
   const [batchIndex, setBatchIndex] = useState("0");
+  const [inputFormat, setInputFormat] = useState<"json" | "csv">("json");
   const [jsonInput, setJsonInput] = useState(DEFAULT_SAMPLE_JSON);
+  const [csvInput, setCsvInput] = useState(DEFAULT_SAMPLE_CSV);
   const [built, setBuilt] = useState<BuiltDisbursement | null>(null);
   const [buildError, setBuildError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -37,7 +45,10 @@ export function DisbursementBuilder({ busy, run }: DisbursementBuilderProps) {
     setBuildError(null);
     setSubmitted(false);
     try {
-      const entries = parsePaymentEntriesJson(jsonInput);
+      const entries =
+        inputFormat === "json"
+          ? parsePaymentEntriesJson(jsonInput)
+          : parsePaymentEntriesCsv(csvInput);
       const salt = new Uint8Array(32);
       // Per-programme deterministic salt based on programme ID
       const saltBuffer = Buffer.alloc(32);
@@ -138,16 +149,54 @@ export function DisbursementBuilder({ busy, run }: DisbursementBuilderProps) {
         </div>
 
         <div>
-          <label htmlFor="batch-json-input" className="text-xs text-muted-foreground">
-            Payment Entries (JSON array of &#123; reference, amount in stroops &#125;)
-          </label>
-          <textarea
-            id="batch-json-input"
-            className="mt-1 h-36 w-full rounded-md border border-border bg-background p-2.5 font-mono text-xs"
-            value={jsonInput}
-            onChange={(e) => setJsonInput(e.target.value)}
-            disabled={busy}
-          />
+          <div className="flex items-center justify-between">
+            <label htmlFor="batch-entries-input" className="text-xs text-muted-foreground">
+              Payment Entries {inputFormat === "json" ? "(JSON array)" : "(CSV format: reference,amount)"}
+            </label>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
+                  inputFormat === "json"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => setInputFormat("json")}
+                disabled={busy}
+              >
+                JSON
+              </button>
+              <button
+                type="button"
+                className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
+                  inputFormat === "csv"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => setInputFormat("csv")}
+                disabled={busy}
+              >
+                CSV
+              </button>
+            </div>
+          </div>
+          {inputFormat === "json" ? (
+            <textarea
+              id="batch-entries-input"
+              className="mt-1 h-36 w-full rounded-md border border-border bg-background p-2.5 font-mono text-xs"
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              disabled={busy}
+            />
+          ) : (
+            <textarea
+              id="batch-entries-input"
+              className="mt-1 h-36 w-full rounded-md border border-border bg-background p-2.5 font-mono text-xs"
+              value={csvInput}
+              onChange={(e) => setCsvInput(e.target.value)}
+              disabled={busy}
+            />
+          )}
         </div>
 
         {buildError && <p className="text-xs font-medium text-destructive">{buildError}</p>}
