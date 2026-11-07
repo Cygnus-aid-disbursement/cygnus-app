@@ -34,7 +34,7 @@ AID-SUDAN-REG-004,250000000`;
 
     // 3. Mock contract verifier that knows the committed root on-chain
     const committedRootHex = pkg.rootHex;
-    const verifier: ReceiptVerifier = {
+    const verifier: InclusionVerifier = {
       verifyInclusion: async (progId, bIdx, leaf, proof) => {
         // Simulates contract checking Merkle inclusion against stored batch root
         if (progId !== 42n || bIdx !== 3) return false;
