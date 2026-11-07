@@ -1,10 +1,7 @@
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ProgressBar } from "@/components/progress-bar";
 import { listProgrammes } from "@/lib/cygnus";
-import { formatStroops, shortAddress } from "@/lib/format";
-import { programmeStatusLabel, progress } from "@/lib/enums";
+import { toClientProgrammeSummary } from "@/lib/programme-filter";
+import { ProgrammeSearch } from "@/components/programme-search";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +13,8 @@ export default async function Home() {
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
   }
+
+  const summaries = programmes ? programmes.map(toClientProgrammeSummary) : [];
 
   return (
     <div className="space-y-8">
@@ -36,42 +35,8 @@ export default async function Home() {
             {error}
           </CardContent>
         </Card>
-      ) : programmes && programmes.length > 0 ? (
-        <div className="grid gap-4">
-          {programmes.map((p) => (
-            <Link key={p.id.toString()} href={`/programmes/${p.id}`}>
-              <Card className="transition-colors hover:border-accent">
-                <CardContent className="space-y-3 pt-5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Programme #{p.id.toString()}</span>
-                    <Badge tone={p.status.tag === "Active" ? "active" : "closed"}>
-                      {programmeStatusLabel(p.status)}
-                    </Badge>
-                  </div>
-                  <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">
-                    <div>
-                      <dt className="text-muted-foreground">Sponsor</dt>
-                      <dd>{shortAddress(p.sponsor)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Implementer</dt>
-                      <dd>{shortAddress(p.implementer)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Budget</dt>
-                      <dd>{formatStroops(p.total)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Disbursed</dt>
-                      <dd>{formatStroops(p.disbursed)}</dd>
-                    </div>
-                  </dl>
-                  <ProgressBar value={progress(p.disbursed, p.total)} />
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+      ) : summaries.length > 0 ? (
+        <ProgrammeSearch initialProgrammes={summaries} />
       ) : (
         <Card>
           <CardContent className="pt-5 text-sm text-muted-foreground">
