@@ -17,6 +17,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/copy-button";
+import { DisbursementBuilder } from "@/components/disbursement-builder";
+import { AnchorPayout } from "@/components/anchor-payout";
 import { CONTRACT_ID, NETWORK_PASSPHRASE, RPC_URL } from "@/lib/client-cygnus";
 import { formatErrorMessage } from "@/lib/errors";
 import { shortAddress } from "@/lib/format";
@@ -116,6 +118,8 @@ export function ConsoleClient() {
         <div className="rounded-md border border-border bg-muted p-3 text-sm">{status}</div>
       )}
 
+      <DisbursementBuilder busy={busy} run={run} />
+      <AnchorPayout />
       <ClaimForm busy={busy} run={run} />
       <ApproveRejectForm busy={busy} run={run} />
       <FundForm busy={busy} run={run} />
