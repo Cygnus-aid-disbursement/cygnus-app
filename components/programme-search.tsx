@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/progress-bar";
 import { CopyButton } from "@/components/copy-button";
+import { AstrolabeBadge } from "@/components/astrolabe-badge";
 import {
   filterProgrammes,
   type ClientProgrammeSummary,
@@ -139,8 +140,9 @@ export function ProgrammeSearch({ initialProgrammes }: ProgrammeSearchProps) {
                     </div>
                     <div>
                       <dt className="text-muted-foreground">Implementer</dt>
-                      <dd className="flex items-center gap-1">
+                      <dd className="flex flex-wrap items-center gap-1">
                         <span>{p.implementerShort}</span>
+                        {p.isImplementerVerified && <AstrolabeBadge />}
                         <CopyButton
                           value={p.implementer}
                           label={`Copy implementer address for programme #${p.id}`}

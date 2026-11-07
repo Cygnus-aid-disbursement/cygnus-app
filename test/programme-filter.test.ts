@@ -18,6 +18,7 @@ describe("programme filtering logic", () => {
     sponsorShort: "GASPO...AAAA",
     implementerShort: "GAIMP...AAAA",
     progressPct: 25,
+    isImplementerVerified: false,
   };
 
   const p1: ClientProgrammeSummary = {
@@ -31,6 +32,7 @@ describe("programme filtering logic", () => {
     sponsorShort: "GASPO...BBBB",
     implementerShort: "GAIMP...BBBB",
     progressPct: 100,
+    isImplementerVerified: false,
   };
 
   const p2: ClientProgrammeSummary = {
@@ -44,6 +46,7 @@ describe("programme filtering logic", () => {
     sponsorShort: "GAORA...CCCC",
     implementerShort: "GABAN...CCCC",
     progressPct: 0,
+    isImplementerVerified: true,
   };
 
   const list = [p0, p1, p2];
