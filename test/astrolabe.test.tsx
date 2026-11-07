@@ -40,13 +40,16 @@ describe("astrolabe module", () => {
     });
 
     it("contains honest ledger disclaimer in title and aria-label", () => {
-      const html = renderToStaticMarkup(<AstrolabeBadge />);
+      const html = renderToStaticMarkup(<AstrolabeBadge attestationId="att-12345" />);
       expect(html).toContain(
         "Confirms organization identity; does not represent on-chain proof of physical aid delivery.",
       );
       expect(html).toContain(
         "Blockchain records funds movement under protocol rules, not physical delivery of aid.",
       );
+      expect(html).toContain("Attestation ID: att-12345");
+      expect(html).toContain('tabindex="0"');
+      expect(html).toContain('role="note"');
     });
   });
 });
