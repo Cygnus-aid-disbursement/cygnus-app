@@ -48,19 +48,36 @@ follows both through the SDK.
 ```
 app/
   layout.tsx            shell and navigation
+  loading.tsx           dashboard loading skeleton
+  error.tsx             root client error boundary
   page.tsx              public dashboard: programme list
-  programmes/[id]/      programme detail: milestones and batches
-  verify/               paste a receipt, verify an inclusion proof
+  programmes/[id]/      programme detail: milestones, batches, and live event timeline
+  verify/               paste a receipt, verify Merkle inclusion proof
   console/              wallet-authenticated implementer console
 components/
-  ui/                   small shadcn-style primitives (button, card, badge)
-  console-client.tsx    the console forms and wallet wiring
-  progress-bar.tsx
+  ui/                   accessible primitives (button, card, badge)
+  anchor-payout.tsx     fiat and mobile off-ramp workflows
+  astrolabe-badge.tsx   verified-NGO accreditation badge
+  console-client.tsx    the console forms, wallet wiring, and client actions
+  copy-button.tsx       accessible clipboard helper with screen-reader live region
+  disbursement-builder.tsx  Merkle disbursement builder with local salting and receipt export
+  event-timeline.tsx    chronological contract event feed
+  programme-search.tsx  client-side search and status filter
+  progress-bar.tsx      milestone budget progress bar
 lib/
-  cygnus.ts             server-side SDK reads; resolves the deployment
+  anchor.ts             Stellar Anchor client integration and quote tracking
+  astrolabe.ts          Astrolabe Schema Registry NGO verification lookups
+  batch-builder.ts      confidential recipient salting and Merkle tree generation
   client-cygnus.ts      browser read client for the verify page
-  format.ts, enums.ts   presentation helpers
-test/                   unit tests for the presentation helpers
+  cygnus.ts             server-side SDK reads; resolves deployment and contract events
+  enums.ts              milestone and programme state mappings
+  errors.ts             Soroban contract error translation (`Error(Contract, #N)`)
+  events.ts             human-readable contract event formatting
+  format.ts             BigInt stroop currency formatting and address truncation
+  programme-filter.ts   pure search and status filtering logic
+  receipt.ts            strict receipt parsing and cryptographic verification
+  validators.ts         Stellar address, contract ID, and positive stroop amount validation
+test/                   comprehensive unit and integration test suites (160+ tests)
 ```
 
 ## Getting set up
@@ -132,20 +149,32 @@ CI runs exactly these, and they must pass:
 ```bash
 pnpm lint
 pnpm typecheck
+pnpm run format:check
 pnpm test
 pnpm build
+```
+
+Format code automatically before committing:
+
+```bash
+pnpm run format
 ```
 
 ## Pull request checklist
 
 - [ ] `pnpm lint` is clean.
 - [ ] `pnpm typecheck` passes.
+- [ ] `pnpm run format:check` passes with 100% Prettier compliance.
 - [ ] `pnpm test` passes.
 - [ ] `pnpm build` succeeds.
 - [ ] New UI is legible on a phone and keyboard accessible.
 - [ ] No direct contract calls and no re-implemented SDK logic.
 - [ ] No copy implies the chain proves delivery of goods or receipt of aid.
 - [ ] Any dependent pull request in another repository is linked.
+
+## Code of Conduct
+
+All contributors are expected to uphold the [Code of Conduct](CODE_OF_CONDUCT.md). Please report any unacceptable behavior to olorunfemi787@gmail.com.
 
 ## Releases
 
