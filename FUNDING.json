@@ -1,0 +1,12 @@
+{
+  "name": "Cygnus Aid Disbursement",
+  "description": "Open-source humanitarian aid disbursement protocol on Stellar Soroban",
+  "drips": {
+    "protocol": "drips-v2",
+    "network": "stellar-testnet",
+    "account": "olorunfemi787@gmail.com"
+  },
+  "community": {
+    "github": "https://github.com/Cygnus-aid-disbursement/cygnus-app"
+  }
+}
