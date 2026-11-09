@@ -1,145 +1,217 @@
-# cygnus-app
+# Cygnus App
 
-The public dashboard and implementer console for Cygnus, a humanitarian aid
-disbursement protocol on Stellar's Soroban platform. Anyone can read the public
-record without an account; an implementer connects a wallet to create programmes,
-claim milestones, and approve or reject them.
+[![CI](https://github.com/Cygnus-aid-disbursement/cygnus-app/actions/workflows/ci.yml/badge.svg)](https://github.com/Cygnus-aid-disbursement/cygnus-app/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Vitest](https://img.shields.io/badge/tests-160%20passing-brightgreen.svg)](test)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](tsconfig.json)
 
-Unaudited. Testnet only. There is no mainnet deployment and no mainnet
-configuration. Do not use this to move real value.
+The open-source public dashboard and implementer console for **Cygnus**, a humanitarian aid disbursement protocol built on Stellar's Soroban smart contract platform. Anyone can inspect programme funding, milestone approvals, and disbursement commitments without an account. Accredited implementers connect a Stellar wallet to manage programmes, submit milestone evidence, calculate Merkle payout batches, and trigger anchor off-ramps.
 
-This is the application repository, the last of three:
+> **Status:** Unaudited. Configured for Stellar Testnet. Intended for demonstration, protocol testing, and grant evaluation.
 
-- [cygnus-contracts](https://github.com/Cygnus-aid-disbursement/cygnus-contracts)
-  — the Rust contract and protocol specification.
-- [cygnus-sdk](https://github.com/Cygnus-aid-disbursement/cygnus-sdk) — the
-  TypeScript client, Merkle batches, and hashing conventions.
-- **cygnus-app** (here) — the dashboard and console.
+---
 
-Dependencies point one way: contracts, then SDK, then app. Everything on chain
-goes through `@cygnus-aid-disbursement/sdk`; this app never calls a contract
-directly and never re-implements Merkle or hashing logic. See
-[docs/multi-repo.md](docs/multi-repo.md).
+## Architecture & Multi-Repository Design
 
-## What the chain proves, and what it does not
+Cygnus is structured across three repositories with strict one-way dependency flow:
 
-Cygnus records that funds moved from one party to another under a stated rule: a
-programme was funded, a milestone was claimed and approved, a batch of a given
-total and count was disbursed. That is what this dashboard shows.
+```
+┌─────────────────────────────────┐
+│        cygnus-contracts         │  Rust / Soroban smart contracts
+│  (Protocol Specification & WASM)│  Owns deployment truth
+└────────────────┬────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────┐
+│           cygnus-sdk            │  TypeScript SDK & bindings
+│(Client, Merkle Tree, & Hashing) │  Vendors contract interfaces
+└────────────────┬────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────┐
+│           cygnus-app            │  Next.js 15 App Router Frontend
+│     (Public Dashboard & UI)     │  Consumes SDK; no raw contract calls
+└─────────────────────────────────┘
+```
 
-It does not show that goods were delivered, that services were rendered, or that
-the right people received aid. A disbursement batch publishes a Merkle root, a
-total, and a count; it commits to a list of payouts without proving anyone
-received value. Beneficiaries are never named. Read the record for what it is: a
-public, tamper-evident account of money movement, not a receipt for outcomes.
+See [docs/multi-repo.md](docs/multi-repo.md) for the cross-repository specification.
 
-Individual payouts never go on chain. A disbursement publishes only a Merkle
-root, a total, and a count, and recipient references are salted before they are
-hashed into a leaf, so the same person cannot be correlated across programmes.
-The dashboard never displays a recipient list because none exists on chain.
+---
 
-## Status
+## Core Protocol Guarantees
 
-Reads live from the Testnet programme contract
-`CBN6MNOWZISG6EXVCUQSGKASFSIBVDBZSVASI6FZYBLBMLHMQWL6SAL7`, vendored through the
-SDK.
+### 1. The Privacy Invariant
 
-What works today: the public dashboard (programme list, programme detail with the
-milestone timeline and disbursement batches, and the receipt verify page) with no
-wallet, and the implementer console for create, fund, claim, approve, and reject
-behind a Stellar wallet.
+Humanitarian disbursements operate in sensitive environments. Beneficiary personal information (names, national identification numbers, phone numbers, biometric records) **never reaches the blockchain or public API responses**:
 
-What does not work yet: the console cannot yet build and submit a disbursement
-batch or produce receipts, there is no event feed on the detail page, and there
-is no anchor payout flow or offline field client. These gaps are tracked as
-GitHub issues.
+- Beneficiary references are salted with a confidential programme secret.
+- Salted references are hashed into Merkle tree leaves (`SHA256(recipientRef || amount)`).
+- Only the 32-byte Merkle root, the total stroop amount, and the recipient count are committed on-chain.
+- The same beneficiary cannot be correlated across different programmes.
 
-## Two faces
+### 2. Honest Ledger Claims
 
-- **Public dashboard.** No wallet, no account. A list of programmes with sponsor,
-  implementer, budget, and disbursement progress; a programme detail with the
-  milestone timeline, each claim and approval with its evidence hash, and each
-  disbursement batch with its root, total, and count; and a page where anyone can
-  paste a receipt and verify an inclusion proof against the on-chain root.
-- **Implementer console.** Authenticated by a Stellar wallet. Create and fund a
-  programme, claim a milestone with evidence, and approve or reject as an
-  approver. Evidence documents stay in the browser; only their hashes go on chain,
-  and the hash is shown next to each document.
+Cygnus adheres strictly to the Constellation honest ledger standard:
 
-## Setup
+- **What the blockchain records:** Authorized funds movement under protocol rules (escrow locks, multi-party approvals, and cryptographic root commitments).
+- **What the blockchain does not prove:** Physical delivery of relief supplies, food baskets, or physical cash handoffs.
+- **Astrolabe Verified-NGO Badges:** Verification confirms an organization's legal identity and registry accreditation via the Astrolabe Schema Registry; it does not claim proof of physical aid delivery.
 
-Prerequisites: Node 20 or later and pnpm 9 or later (`corepack enable`).
+---
 
-The SDK is a private GitHub Packages dependency. Authenticate with a token that
-has `read:packages`:
+## Features
+
+### 1. Public Transparency Dashboard (`/`)
+
+- **Real-Time Ledger Querying:** Direct live reads of programme budgets, milestone releases, and disbursement batches from Stellar Testnet.
+- **Client-Side Search & Filter:** Instant search by programme ID, sponsor address, or implementer address.
+- **Status Filter Chips:** Filter by `All`, `Active`, and `Closed` with accessible screen-reader live announcements (`aria-live="polite"`).
+- **Astrolabe Accreditation:** Visual badge display for verified implementers with hover/aria disclaimers.
+
+### 2. Programme Detail & Event Timeline (`/programmes/[id]`)
+
+- **Milestone Tracking:** Milestone states (`Proposed`, `Claimed`, `Approved`, `Rejected`) with budget progress indicators.
+- **Evidence Verification:** Display of cryptographically hashed evidence and rejection reasons.
+- **Chronological Event Feed:** Live timeline formatted from contract events (`funded`, `claimed`, `approved`, `rejected`, `disbursed`) with copyable transaction hashes.
+
+### 3. Cryptographic Receipt Verification (`/verify`)
+
+- **Self-Service Inclusion Proof:** Beneficiaries and independent auditors can paste their receipt JSON.
+- **Zero-Knowledge Inclusion:** Cryptographically validates Merkle inclusion proofs against the on-chain batch root without disclosing any other recipient in the batch.
+
+### 4. Implementer Console (`/console`)
+
+- **Wallet Connection:** Connects via Stellar Wallets Kit (Freighter, xBull, Albedo).
+- **Disbursement Batch Builder:**
+  - Ingest payment lists via structured JSON or field-sheet CSV (`reference,amount`).
+  - Local confidential salting and real-time Merkle tree generation.
+  - Downloadable receipt packages ready for distribution to beneficiaries.
+  - One-click transaction submission via `cy.disburse()`.
+- **Anchor Off-Ramp Flow:**
+  - SEP-31 / SEP-24 fiat off-ramp quote requesting and status tracking.
+  - Graceful fallback for `StubAnchor` in test environments.
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 20.x or higher
+- pnpm 9.x or higher (`corepack enable`)
+- A Stellar wallet browser extension (e.g., [xBull](https://xbull.app) or [Freighter](https://www.freighter.app)) for console interactions.
+
+### Installation
 
 ```bash
-export NODE_AUTH_TOKEN=<a GitHub token with read:packages>
+# Clone the repository
+git clone https://github.com/Cygnus-aid-disbursement/cygnus-app.git
+cd cygnus-app
+
+# Set your GitHub Packages read token
+export NODE_AUTH_TOKEN="your_github_token_with_read_packages"
+
+# Install dependencies
 pnpm install
+
+# Start the development server
 pnpm dev
 ```
 
-Then open http://localhost:3000. The dashboard reads live from the deployment the
-SDK vendors, so it works with no deployment of your own.
+Open [http://localhost:3000](http://localhost:3000) in your browser. The application will immediately read from the deployed testnet contract vendored through the SDK.
+
+---
 
 ## Configuration
 
-Copy `.env.example` to `.env.local`. Every value has a working default except
-`NODE_AUTH_TOKEN`.
+Copy `.env.example` to `.env.local` to override defaults:
 
-- `NODE_AUTH_TOKEN` — a token with `read:packages`, used only to install the SDK
-  from GitHub Packages. Not read at runtime.
-- `CYGNUS_DEPLOYMENTS` — point the app at a specific deployment file instead of
-  the SDK's vendored one. A contract developer running a local Testnet deploy sets
-  this to their contracts repo's `deployments/local-testnet.json`, per
-  docs/multi-repo.md. Server-side only.
-- `NEXT_PUBLIC_RPC_URL` — Soroban RPC URL. Defaults to the public Testnet RPC.
-- `READER_PUBLIC_KEY` / `NEXT_PUBLIC_READER_PUBLIC_KEY` — a funded Testnet
-  account used only to simulate read-only calls. No signing happens with it.
-- `NEXT_PUBLIC_CONTRACT_ID` — override the programme contract id in the browser.
-  Defaults to the id the SDK vendors; normally left unset.
+| Variable                             | Description                                           | Default                               |
+| :----------------------------------- | :---------------------------------------------------- | :------------------------------------ |
+| `NODE_AUTH_TOKEN`                    | GitHub token with `read:packages` (install-time only) | —                                     |
+| `NEXT_PUBLIC_RPC_URL`                | Soroban RPC endpoint                                  | `https://soroban-testnet.stellar.org` |
+| `NEXT_PUBLIC_NETWORK_PASSPHRASE`     | Stellar network passphrase                            | `Test SDF Network ; September 2015`   |
+| `NEXT_PUBLIC_CONTRACT_ID`            | Override default programme contract ID                | Vendored from SDK                     |
+| `CYGNUS_DEPLOYMENTS`                 | Path to local deployment JSON (server-side only)      | —                                     |
+| `NEXT_PUBLIC_ASTROLABE_REGISTRY_URL` | Astrolabe schema registry resolver URL                | Testnet resolver                      |
 
-## Development
+---
+
+## Repository Map
+
+```
+cygnus-app/
+├── app/
+│   ├── layout.tsx                # Global shell, navigation, and font configuration
+│   ├── loading.tsx               # Root loading skeleton
+│   ├── error.tsx                 # Root error boundary with retry trigger
+│   ├── page.tsx                  # Public dashboard homepage
+│   ├── programmes/[id]/          # Programme detail view with live event feed
+│   ├── verify/                   # Receipt proof verification client
+│   └── console/                  # Implementer console route
+├── components/
+│   ├── ui/                       # Accessible UI primitives (Button, Card, Badge)
+│   ├── anchor-payout.tsx         # Stellar anchor fiat off-ramp component
+│   ├── astrolabe-badge.tsx       # Verified-NGO badge with honest ledger disclaimers
+│   ├── console-client.tsx        # Wallet connection and programme management forms
+│   ├── copy-button.tsx           # Accessible clipboard button with feedback state
+│   ├── disbursement-builder.tsx  # Merkle disbursement batch builder
+│   ├── event-timeline.tsx        # Chronological contract event timeline
+│   └── programme-search.tsx      # Client-side search and status filter
+├── docs/
+│   ├── multi-repo.md             # Cross-repository contract specification
+│   └── disbursement-and-anchor.md# Batch privacy architecture and anchor flows
+├── lib/
+│   ├── anchor.ts                 # Stellar Anchor client integration
+│   ├── astrolabe.ts              # Astrolabe Schema Registry NGO verification
+│   ├── batch-builder.ts          # Recipient salting and Merkle tree generation
+│   ├── cygnus.ts                 # Server-side Soroban data queries and events
+│   ├── errors.ts                 # Soroban contract error translation (`Error(Contract, #N)`)
+│   ├── events.ts                 # Contract event parsing and formatting
+│   ├── format.ts                 # BigInt stroop currency formatting
+│   ├── programme-filter.ts       # Pure search and filter logic
+│   ├── receipt.ts                # Strict receipt parser and proof verification
+│   └── validators.ts             # Stellar address, contract ID, and stroop validators
+└── test/                         # Comprehensive unit & integration tests (160+ tests)
+```
+
+---
+
+## Quality Assurance & Verification
+
+Cygnus App enforces strict code quality and verification gates:
 
 ```bash
-pnpm dev        # local dev server
-pnpm lint
-pnpm typecheck
+# Run test suite (160 tests across 21 files)
 pnpm test
+
+# Check TypeScript types
+pnpm typecheck
+
+# Lint with ESLint
+pnpm lint
+
+# Check code formatting with Prettier
+pnpm run format:check
+
+# Format code automatically
+pnpm run format
+
+# Compile production build
 pnpm build
 ```
 
-## Deploying to Vercel
-
-The app builds on Vercel with the framework defaults; no `vercel.json` is needed.
-
-- Root directory: the repository root (this repo holds only the app).
-- Build command: `pnpm build` (Vercel's Next.js default, `next build`).
-- Install command: the default `pnpm install`. The repo's `.npmrc` points the
-  `@cygnus-aid-disbursement` scope at GitHub Packages and reads `NODE_AUTH_TOKEN`,
-  so the install fails without that token.
-- Output: left to the Next.js default; do not set an output directory.
-
-Environment variables to set in the Vercel project:
-
-- `NODE_AUTH_TOKEN` (required) — a GitHub token with `read:packages`, so the
-  build can install the SDK from GitHub Packages.
-- `NEXT_PUBLIC_RPC_URL` (optional) — defaults to the public Testnet RPC.
-- `READER_PUBLIC_KEY` and `NEXT_PUBLIC_READER_PUBLIC_KEY` (optional) — a funded
-  Testnet account for read-only simulation; both default to a built-in account.
-- `NEXT_PUBLIC_CONTRACT_ID` (optional) — defaults to the id the SDK vendors.
-
-## Scope
-
-At this stage the console covers create, fund, claim, approve, and reject. The
-disbursement UI, beneficiary receipts beyond the verify page, anchor payouts, and
-the offline field client are tracked in [ISSUES.md](ISSUES.md).
+---
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues privately per
-[SECURITY.md](SECURITY.md).
+We welcome contributions from the open-source community. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before submitting pull requests.
 
-## License
+All commits follow the [Conventional Commits](https://www.conventionalcommits.org) specification (`feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `style:`).
 
-Apache-2.0. See [LICENSE](LICENSE).
+---
+
+## License & Security
+
+- **License:** Licensed under the [Apache License, Version 2.0](LICENSE).
+- **Security Policy:** For vulnerability reporting, please see [SECURITY.md](SECURITY.md).

@@ -155,6 +155,7 @@ pnpm build
 ```
 
 Format code automatically before committing:
+
 ```bash
 pnpm run format
 ```
