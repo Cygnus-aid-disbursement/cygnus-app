@@ -28,7 +28,17 @@ jobs:
           # read packages in this organisation.
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           "npm_config_//npm.pkg.github.com/:_authToken": ${{ secrets.GITHUB_TOKEN }}
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm build
+      - name: Lint code
+        run: pnpm lint
+
+      - name: Check TypeScript types
+        run: pnpm typecheck
+
+      - name: Check code formatting
+        run: pnpm run format:check
+
+      - name: Run unit and integration tests
+        run: pnpm test
+
+      - name: Build Next.js application
+        run: pnpm build
