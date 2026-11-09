@@ -5,10 +5,10 @@ use it to move real value.
 
 ## Reporting a vulnerability
 
-Report privately to **security@cygnus-aid.org**. Do not open a public issue for a
+Report privately via email to **olorunfemi787@gmail.com** (or security@cygnus-aid.org). Do not open a public issue for a
 suspected vulnerability. Include what you did, what you observed, and how to
-reproduce it. We will acknowledge and keep you updated, and we ask for reasonable
-time to fix before public disclosure.
+reproduce it. We aim to acknowledge reports within 48 hours and keep you updated throughout the investigation. We ask for reasonable
+time to patch before public disclosure.
 
 ## Sensitive surfaces in this repository
 
