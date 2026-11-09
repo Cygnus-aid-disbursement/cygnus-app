@@ -33,8 +33,9 @@ export default function RootError({ error, reset }: ErrorBoundaryProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            The application encountered an error while interacting with the Stellar ledger or rendering this view.
-            Testnet may be experiencing temporary rate limits or a scheduled reset.
+            The application encountered an error while interacting with the Stellar ledger or
+            rendering this view. Testnet may be experiencing temporary rate limits or a scheduled
+            reset.
           </p>
 
           <div className="rounded-md border border-border bg-muted/40 p-3 font-mono text-xs text-foreground break-all">

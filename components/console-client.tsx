@@ -317,13 +317,19 @@ function CreateForm({ busy, run, address }: { busy: boolean; run: Runner; addres
         onClick={() =>
           run("Create programme", async (cy) => {
             if (!isValidStellarAddress(implementer)) {
-              throw new Error("Implementer must be a valid 56-character Stellar account address (starts with G)");
+              throw new Error(
+                "Implementer must be a valid 56-character Stellar account address (starts with G)",
+              );
             }
             if (!isValidStellarAddress(approver)) {
-              throw new Error("Approver must be a valid 56-character Stellar account address (starts with G)");
+              throw new Error(
+                "Approver must be a valid 56-character Stellar account address (starts with G)",
+              );
             }
             if (!isValidContractId(asset)) {
-              throw new Error("Asset must be a valid 56-character Soroban contract ID (starts with C)");
+              throw new Error(
+                "Asset must be a valid 56-character Soroban contract ID (starts with C)",
+              );
             }
 
             const totRes = validateStroopAmount(total, "Total budget");

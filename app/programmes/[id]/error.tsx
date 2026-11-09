@@ -36,7 +36,8 @@ export default function ProgrammeDetailError({ error, reset }: ProgrammeErrorPro
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Could not fetch this programme from the Stellar network. It might not exist, or the RPC node is temporarily unreachable.
+            Could not fetch this programme from the Stellar network. It might not exist, or the RPC
+            node is temporarily unreachable.
           </p>
 
           <div className="rounded-md border border-border bg-muted/40 p-3 font-mono text-xs text-foreground break-all">

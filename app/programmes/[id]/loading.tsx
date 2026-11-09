@@ -35,7 +35,10 @@ export default function ProgrammeDetailLoading() {
         </CardHeader>
         <CardContent className="space-y-3">
           {[1, 2].map((key) => (
-            <div key={key} className="h-16 rounded-md border border-border/50 bg-muted/20 animate-pulse" />
+            <div
+              key={key}
+              className="h-16 rounded-md border border-border/50 bg-muted/20 animate-pulse"
+            />
           ))}
         </CardContent>
       </Card>

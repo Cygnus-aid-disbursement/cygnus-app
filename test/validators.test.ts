@@ -16,9 +16,9 @@ describe("validators module", () => {
 
     it("rejects addresses with invalid length or prefix", () => {
       expect(isValidStellarAddress("G123")).toBe(false);
-      expect(isValidStellarAddress("CBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")).toBe(
-        false,
-      );
+      expect(
+        isValidStellarAddress("CBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"),
+      ).toBe(false);
       expect(isValidStellarAddress("")).toBe(false);
       expect(isValidStellarAddress(null as unknown as string)).toBe(false);
     });
