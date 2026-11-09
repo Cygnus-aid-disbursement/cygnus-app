@@ -22,6 +22,13 @@ import { AnchorPayout } from "@/components/anchor-payout";
 import { CONTRACT_ID, NETWORK_PASSPHRASE, RPC_URL } from "@/lib/client-cygnus";
 import { formatErrorMessage } from "@/lib/errors";
 import { shortAddress } from "@/lib/format";
+import {
+  isValidStellarAddress,
+  isValidContractId,
+  validateStroopAmount,
+  validateProgrammeId,
+  validateIndex,
+} from "@/lib/validators";
 
 // Native XLM Stellar Asset Contract on Testnet. Editable per programme.
 const NATIVE_SAC = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
@@ -183,8 +190,13 @@ function ClaimForm({ busy, run }: { busy: boolean; run: Runner }) {
         disabled={busy || !programmeId}
         onClick={() =>
           run("Claim", async (cy) => {
+            const pRes = validateProgrammeId(programmeId);
+            if (!pRes.valid) throw new Error(pRes.error);
+            const iRes = validateIndex(index, "Milestone index");
+            if (!iRes.valid) throw new Error(iRes.error);
+
             const hash = hashEvidence({ text: evidence });
-            const tx = await cy.claim(BigInt(programmeId), Number(index), hash);
+            const tx = await cy.claim(pRes.value!, iRes.value!, hash);
             await tx.signAndSend();
             return `evidence hash ${hash.toString("hex").slice(0, 16)}...`;
           })
@@ -210,7 +222,12 @@ function ApproveRejectForm({ busy, run }: { busy: boolean; run: Runner }) {
           disabled={busy || !programmeId}
           onClick={() =>
             run("Approve", async (cy) => {
-              await (await cy.approve(BigInt(programmeId), Number(index))).signAndSend();
+              const pRes = validateProgrammeId(programmeId);
+              if (!pRes.valid) throw new Error(pRes.error);
+              const iRes = validateIndex(index, "Milestone index");
+              if (!iRes.valid) throw new Error(iRes.error);
+
+              await (await cy.approve(pRes.value!, iRes.value!)).signAndSend();
             })
           }
         >
@@ -221,8 +238,13 @@ function ApproveRejectForm({ busy, run }: { busy: boolean; run: Runner }) {
           disabled={busy || !programmeId}
           onClick={() =>
             run("Reject", async (cy) => {
+              const pRes = validateProgrammeId(programmeId);
+              if (!pRes.valid) throw new Error(pRes.error);
+              const iRes = validateIndex(index, "Milestone index");
+              if (!iRes.valid) throw new Error(iRes.error);
+
               const hash = hashRejectionReason({ text: reason });
-              await (await cy.reject(BigInt(programmeId), Number(index), hash)).signAndSend();
+              await (await cy.reject(pRes.value!, iRes.value!, hash)).signAndSend();
             })
           }
         >
@@ -253,7 +275,12 @@ function FundForm({ busy, run }: { busy: boolean; run: Runner }) {
         disabled={busy || !programmeId || !amount}
         onClick={() =>
           run("Fund", async (cy) => {
-            await (await cy.fund(BigInt(programmeId), BigInt(amount))).signAndSend();
+            const pRes = validateProgrammeId(programmeId);
+            if (!pRes.valid) throw new Error(pRes.error);
+            const aRes = validateStroopAmount(amount, "Funding amount");
+            if (!aRes.valid) throw new Error(aRes.error);
+
+            await (await cy.fund(pRes.value!, aRes.value!)).signAndSend();
           })
         }
       >
@@ -289,15 +316,37 @@ function CreateForm({ busy, run, address }: { busy: boolean; run: Runner; addres
         disabled={busy || !total || !milestoneAmount || !dueBy}
         onClick={() =>
           run("Create programme", async (cy) => {
+            if (!isValidStellarAddress(implementer)) {
+              throw new Error(
+                "Implementer must be a valid 56-character Stellar account address (starts with G)",
+              );
+            }
+            if (!isValidStellarAddress(approver)) {
+              throw new Error(
+                "Approver must be a valid 56-character Stellar account address (starts with G)",
+              );
+            }
+            if (!isValidContractId(asset)) {
+              throw new Error(
+                "Asset must be a valid 56-character Soroban contract ID (starts with C)",
+              );
+            }
+
+            const totRes = validateStroopAmount(total, "Total budget");
+            if (!totRes.valid) throw new Error(totRes.error);
+
+            const msRes = validateStroopAmount(milestoneAmount, "Milestone amount");
+            if (!msRes.valid) throw new Error(msRes.error);
+
             const due = BigInt(Math.floor(new Date(dueBy).getTime() / 1000));
             const tx = await cy.createProgramme({
               sponsor: address,
               implementer,
               asset,
-              total: BigInt(total),
+              total: totRes.value!,
               milestones: [
                 {
-                  amount: BigInt(milestoneAmount),
+                  amount: msRes.value!,
                   description_hash: hashMilestoneDescription({ text: description }),
                   due_by: due,
                 },
